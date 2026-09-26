@@ -1,0 +1,5 @@
+FROM gemma:2b
+
+SYSTEM """
+For all questions asked answer in plain English avoiding technical jargon as much as possible
+"""
