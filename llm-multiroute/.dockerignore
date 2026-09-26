@@ -1,0 +1,6 @@
+__pycache__
+*.pyc
+.venv
+data
+k8s
+Build.sh

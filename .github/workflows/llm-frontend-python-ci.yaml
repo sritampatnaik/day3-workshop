@@ -1,0 +1,56 @@
+name: llm-frontend-python-ci
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "llm-frontend-python/**"
+      - ".github/workflows/llm-frontend-python-ci.yaml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build-scan-push:
+    name: Build, scan, and push frontend image
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: sritampatnaik
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build image
+        uses: docker/build-push-action@v6
+        with:
+          context: ./llm-frontend-python
+          file: ./llm-frontend-python/Dockerfile
+          load: true
+          push: false
+          tags: sritampatnaik/llm-frontend-python:1.0.0
+
+      - name: Scan image with Trivy
+        uses: aquasecurity/trivy-action@0.28.0
+        with:
+          image-ref: sritampatnaik/llm-frontend-python:1.0.0
+          format: table
+          severity: HIGH,CRITICAL
+          exit-code: "0"
+
+      - name: Push image to Docker Hub
+        uses: docker/build-push-action@v6
+        with:
+          context: ./llm-frontend-python
+          file: ./llm-frontend-python/Dockerfile
+          push: true
+          tags: |
+            sritampatnaik/llm-frontend-python:1.0.0
+            sritampatnaik/llm-frontend-python:latest

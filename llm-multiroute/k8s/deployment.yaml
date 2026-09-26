@@ -1,0 +1,60 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: llm-multiroute-backend
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: llm-multiroute-app
+  namespace: llm-multiroute-backend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: llm-multiroute
+  template:
+    metadata:
+      labels:
+        app: llm-multiroute
+    spec:
+      containers:
+        - name: llm-multiroute
+          image: sritampatnaik/llm-multiroute:1.0.0
+          ports:
+            - containerPort: 8080
+          env:
+            - name: OLLAMA_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: llm-secrets
+                  key: OLLAMA_API_KEY
+                  optional: true
+            - name: OLLAMA_BASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: llm-secrets
+                  key: OLLAMA_BASE_URL
+                  optional: true
+            - name: OLLAMA_MODEL
+              value: gemma:2b
+            - name: DATA_DIR
+              value: /data
+          volumeMounts:
+            - name: data
+              mountPath: /data
+      volumes:
+        - name: data
+          emptyDir: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: llm-multiroute-service
+  namespace: llm-multiroute-backend
+spec:
+  selector:
+    app: llm-multiroute
+  ports:
+    - port: 8080
+      targetPort: 8080

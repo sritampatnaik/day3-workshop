@@ -1,0 +1,38 @@
+name: promptfoo-tests
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "promptfoo-tests/**"
+      - ".github/workflows/promptfoo-tests.yaml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  eval:
+    name: Run Promptfoo eval
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: promptfoo-tests
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Install Promptfoo
+        run: npm install
+
+      - name: Run eval
+        run: npm run eval
+        env:
+          OLLAMA_API_KEY: ${{ secrets.OLLAMA_API_KEY }}
+          OLLAMA_BASE_URL: ${{ secrets.OLLAMA_BASE_URL }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}

@@ -1,0 +1,16 @@
+description: llmapp09 promptfoo smoke eval
+prompts:
+  - "Classify the sentiment of this text: {{text}}"
+providers:
+  - echo
+tests:
+  - vars:
+      text: I love this workshop
+    assert:
+      - type: contains
+        value: I love this workshop
+  - vars:
+      text: This result is bad
+    assert:
+      - type: contains
+        value: This result is bad

@@ -1,0 +1,38 @@
+name: deepeval-tests
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "deepeval-tests/**"
+      - ".github/workflows/deepeval-tests.yaml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  eval:
+    name: Run DeepEval tests
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: deepeval-tests
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run DeepEval
+        run: deepeval test run test_classify.py test_sentiment.py test_summarize.py test_intent.py
+        env:
+          OLLAMA_API_KEY: ${{ secrets.OLLAMA_API_KEY }}
+          OLLAMA_BASE_URL: ${{ secrets.OLLAMA_BASE_URL }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}

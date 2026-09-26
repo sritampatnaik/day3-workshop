@@ -1,0 +1,35 @@
+services:
+  llm-multiroute:
+    build: ./llm-multiroute
+    image: sritampatnaik/llm-multiroute:1.0.0
+    ports:
+      - "8080:8080"
+    environment:
+      OLLAMA_API_KEY: ${OLLAMA_API_KEY:-}
+      OLLAMA_BASE_URL: ${OLLAMA_BASE_URL:-http://host.docker.internal:11434}
+      OLLAMA_MODEL: ${OLLAMA_MODEL:-gemma:2b}
+      DATA_DIR: /data
+    volumes:
+      - multiroute-data:/data
+    networks:
+      - llmnet
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+  llm-frontend-python:
+    build: ./llm-frontend-python
+    image: sritampatnaik/llm-frontend-python:1.0.0
+    ports:
+      - "5000:5000"
+    environment:
+      BACKEND_URL: http://llm-multiroute:8080
+    depends_on:
+      - llm-multiroute
+    networks:
+      - llmnet
+
+volumes:
+  multiroute-data:
+
+networks:
+  llmnet:
